@@ -1,6 +1,6 @@
 # node-test-mongo 🛒
 
-API RESTful construida con **Node.js**, **Express** y **MongoDB** (Mongoose), con autenticación mediante **JWT**. Proyecto práctico de las clases 36 y 37 del curso de Backend — Grupo iDT.
+Proyecto fullstack académico — API RESTful con **Node.js**, **Express** y **MongoDB** (Mongoose), autenticación **JWT**, y frontend en **React + Vite**. Clases 36 y 37 del curso de Backend — Grupo iDT.
 
 ---
 
@@ -9,24 +9,41 @@ API RESTful construida con **Node.js**, **Express** y **MongoDB** (Mongoose), co
 ```
 node-test-mongo/
 ├── config/
-│   └── db.js                  # Conexión a MongoDB
+│   └── db.js                        # Conexión a MongoDB
 ├── controllers/
-│   └── productoController.js  # Lógica CRUD de productos
+│   └── productoController.js        # Lógica CRUD de productos
 ├── middlewares/
-│   └── authMiddleware.js      # Verificación de token JWT
+│   └── authMiddleware.js            # Verificación de token JWT
 ├── models/
-│   └── Producto.js            # Schema y modelo Mongoose
+│   └── Producto.js                  # Schema Mongoose (nombre, precio, descripcion, imagen)
 ├── routes/
-│   ├── authRoutes.js          # Ruta de login
-│   └── productoRoutes.js      # Rutas CRUD de productos
-├── app.js                     # Configuración de Express
-├── index.js                   # Punto de entrada del servidor
+│   ├── authRoutes.js                # Ruta de login
+│   └── productoRoutes.js            # Rutas CRUD de productos
+├── frontend/                        # Frontend React + Vite
+│   ├── .env                         # VITE_API_URL=http://localhost:3000
+│   ├── vite.config.js
+│   ├── index.html
+│   └── src/
+│       ├── main.jsx
+│       ├── App.jsx                  # Navegación y estado global
+│       ├── services/
+│       │   └── api.js               # Axios con interceptor JWT
+│       └── components/
+│           ├── Login.jsx
+│           ├── Register.jsx
+│           ├── ProductList.jsx      # Grilla de productos con imágenes
+│           └── Cart.jsx             # Carrito con total
+├── app.js                           # Configuración de Express
+├── index.js                         # Punto de entrada del servidor
+├── seed.js                          # Script para poblar la base de datos
 └── package.json
 ```
 
 ---
 
 ## 🚀 Tecnologías utilizadas
+
+### Backend
 
 | Tecnología | Versión |
 |---|---|
@@ -37,6 +54,14 @@ node-test-mongo/
 | JSON Web Token | ^9.0.0 |
 | CORS | ^2.8.5 |
 
+### Frontend
+
+| Tecnología | Versión |
+|---|---|
+| React | ^18.3.1 |
+| Vite | ^5.4.1 |
+| Axios | ^1.7.2 |
+
 ---
 
 ## ⚙️ Instalación y uso
@@ -46,30 +71,72 @@ node-test-mongo/
 - Node.js v20+
 - MongoDB instalado y corriendo
 
-### Pasos
+### 1. Backend
 
 ```bash
-# 1. Clonar el repositorio
-git clone https://github.com/tu-usuario/node-test-mongo.git
-cd node-test-mongo
-
-# 2. Instalar dependencias
+# Instalar dependencias del backend
 npm install
 
-# 3. Iniciar MongoDB (en WSL/Linux)
+# Iniciar MongoDB (WSL/Linux)
 sudo service mongod start
 
-# 4. Iniciar el servidor
+# Poblar la base de datos con productos de prueba
+node seed.js
+
+# Iniciar el servidor
 npm start
 ```
 
-El servidor quedará escuchando en `http://localhost:3000`.
+El servidor queda escuchando en `http://localhost:3000`.
+
+### 2. Frontend
+
+```bash
+cd frontend
+
+# Instalar dependencias
+npm install
+
+# Iniciar en modo desarrollo
+npm run dev
+```
+
+El frontend queda disponible en `http://localhost:5173`.
+
+---
+
+## 🌱 Seed — datos de prueba
+
+El archivo `seed.js` inserta 10 productos de ejemplo en la colección `productos`. **Borra los existentes** antes de insertar, por lo que se puede ejecutar varias veces sin duplicar.
+
+```bash
+node seed.js
+```
+
+Productos insertados: Escoba, Trapeador, Balde Plástico, Detergente, Esponjas, Guantes de Goma, Bolsas de Basura, Lavandina, Desodorante de Ambientes, Cepillo para Ropa.
+
+Las imágenes de producto provienen de **Picsum Photos** (`https://picsum.photos/seed/{nombre}/300/300`): sin API key, sin costo, imagen consistente por semilla.
+
+---
+
+## 🖥️ Frontend — funcionalidades
+
+| Vista | Descripción |
+|---|---|
+| Login | Formulario usuario/contraseña — guarda el JWT en `localStorage` |
+| Registro | UI de registro simulada (el backend no expone endpoint real) |
+| Productos | Grilla de productos con imagen, precio y botón "Agregar al carrito" — requiere login |
+| Carrito | Lista local con total y opción de vaciar — no requiere backend |
+
+- Navegación manejada con `useState` (sin react-router)
+- El JWT se adjunta automáticamente a cada request via interceptor de Axios
+- Rutas protegidas: redirige a login si no hay token en `localStorage`
 
 ---
 
 ## 🔐 Autenticación JWT
 
-Las rutas de **crear**, **actualizar** y **eliminar** productos requieren un token JWT en el header de la petición.
+Las rutas de **crear**, **actualizar** y **eliminar** productos requieren un token JWT en el header.
 
 ### Obtener el token
 
@@ -129,7 +196,8 @@ Content-Type: application/json
 {
   "nombre": "Escoba",
   "precio": 5000,
-  "descripcion": "Para barrer el patio"
+  "descripcion": "Para barrer el patio",
+  "imagen": "https://picsum.photos/seed/escoba/300/300"
 }
 ```
 
@@ -140,6 +208,7 @@ Content-Type: application/json
   "nombre": "Escoba",
   "precio": 5000,
   "descripcion": "Para barrer el patio",
+  "imagen": "https://picsum.photos/seed/escoba/300/300",
   "fechaCreacion": "2026-03-26T18:29:36.986Z",
   "__v": 0
 }
@@ -188,7 +257,8 @@ Authorization: Bearer <token>
 ## 📝 Notas
 
 - La base de datos utilizada es `tienda` en MongoDB local (`mongodb://localhost:27017/tienda`).
-- El secret JWT usado es `secreto123` (en producción se debe guardar en variables de entorno `.env`).
+- El secret JWT es `secreto123` (en producción debe ir en variables de entorno `.env`).
+- El campo `imagen` en el modelo es opcional — si no se envía, el frontend usa el `_id` como semilla de Picsum.
 - Los datos persisten en MongoDB, a diferencia de un CRUD en memoria.
 
 ---
